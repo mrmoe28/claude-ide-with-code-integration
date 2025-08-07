@@ -39,7 +39,7 @@ This IDE now includes all the features requested to make it similar to Cursor:
 
 ### 5. **Real OpenAI Chat Integration**
 - **Removed all mock chat** responses
-- **Real OpenAI GPT-4 integration** via API
+- **Real OpenAI GPT-4o-mini integration** via API
 - **File context injection** - automatically includes current file
 - **Working directory context**
 - **Streaming responses** for real-time chat
@@ -83,7 +83,7 @@ npm run dev
 - Mac-like theme and font (SF Mono)
 
 ### OpenAI Integration
-- Direct API calls to OpenAI GPT-4
+- Direct API calls to OpenAI GPT-4o-mini
 - System prompt optimized for code assistance
 - File content automatically included in context
 - Rate limiting and error handling
@@ -104,5 +104,5 @@ npm run dev
 - **No mock data** - everything is real functionality
 - **Cursor-like interface** - familiar window management
 - **Real Mac terminal** - actual shell commands work
-- **OpenAI-powered chat** - real AI assistance with code context
+- **OpenAI-powered chat** - real AI assistance with code context (GPT-4o-mini)
 - **Professional code editor** - Monaco with full features

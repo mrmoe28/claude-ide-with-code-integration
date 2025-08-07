@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     const completion = await openai.chat.completions.create({
-      model: process.env.AI_MODEL || 'llama-3.1-sonar-small-128k-online',
+      model: 'llama-3.1-sonar-small-128k-online',
       messages: [systemMessage, ...messages],
       max_tokens: 2000,
       temperature: 0.7,

@@ -72,7 +72,7 @@ export function MainLayout() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }, [claudeCodeMode, showChat])
 
   if (isLoading) {
     return (
@@ -130,12 +130,10 @@ export function MainLayout() {
           showTerminal={showTerminal}
           showChat={showChat}
           claudeCodeMode={claudeCodeMode}
-          terminalType={terminalType}
           onToggleSidebar={() => setShowSidebar(!showSidebar)}
           onToggleTerminal={() => setShowTerminal(!showTerminal)}
           onToggleChat={() => setShowChat(!showChat)}
           onToggleClaudeCodeMode={() => setClaudeCodeMode(!claudeCodeMode)}
-          onToggleTerminalType={() => setTerminalType(terminalType === 'mac' ? 'webcontainer' : 'mac')}
         />
       </div>
     </div>

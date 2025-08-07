@@ -44,13 +44,13 @@ export function EnhancedSidebar({ onFileSelect, selectedFile }: EnhancedSidebarP
     clearRecentFolders
   } = useFileSystemEnhanced()
 
-  const handleSelectFolder = async () => {
+  const handleSelectFolder = useCallback(async () => {
     try {
       await selectDirectory()
     } catch (err) {
       // Error is already handled in the hook
     }
-  }
+  }, [selectDirectory])
 
   const handleOpenDesktop = async () => {
     try {

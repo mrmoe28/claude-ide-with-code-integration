@@ -261,7 +261,7 @@ export function MacTerminal({ workingDirectory, className = '' }: MacTerminalPro
 
     return () => {
       isComponentMounted = false
-      const state = connectionStateRef.current
+      const currentState = connectionStateRef.current
       
       window.removeEventListener('resize', handleResize)
       
@@ -269,14 +269,14 @@ export function MacTerminal({ workingDirectory, className = '' }: MacTerminalPro
         clearTimeout(resizeTimeout)
       }
       
-      if (state.reconnectTimer) {
-        clearTimeout(state.reconnectTimer)
-        state.reconnectTimer = null
+      if (currentState.reconnectTimer) {
+        clearTimeout(currentState.reconnectTimer)
+        currentState.reconnectTimer = null
       }
       
-      if (state.eventSource) {
-        state.eventSource.close()
-        state.eventSource = null
+      if (currentState.eventSource) {
+        currentState.eventSource.close()
+        currentState.eventSource = null
       }
       
       if (eventSourceRef.current) {
