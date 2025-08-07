@@ -21,7 +21,6 @@ export async function POST(request: NextRequest) {
 
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
-      baseURL: 'https://api.perplexity.ai',
     })
 
     const systemMessage = {
@@ -30,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     const completion = await openai.chat.completions.create({
-      model: 'llama-3.1-sonar-small-128k-online',
+      model: 'gpt-4o-mini',
       messages: [systemMessage, ...messages],
       max_tokens: 2000,
       temperature: 0.7,
