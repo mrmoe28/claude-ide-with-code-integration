@@ -41,7 +41,7 @@ export const db = {
       const result = await sql`
         SELECT * FROM users WHERE id = ${id}
       `
-      return result.rows[0] || null
+      return (result.rows[0] as User) || null
     } catch (error) {
       console.error('Error getting user by ID:', error)
       return null
@@ -53,26 +53,26 @@ export const db = {
       const result = await sql`
         SELECT * FROM users WHERE email = ${email}
       `
-      return result.rows[0] || null
+      return (result.rows[0] as User) || null
     } catch (error) {
       console.error('Error getting user by email:', error)
       return null
     }
   },
 
-  async createUser(user: Omit<User, 'created_at' | 'updated_at'>): Promise<User | null> {
-    try {
-      const result = await sql`
-        INSERT INTO users (id, email, name, image, email_verified)
-        VALUES (${user.id}, ${user.email}, ${user.name}, ${user.image}, ${user.email_verified})
-        RETURNING *
-      `
-      return result.rows[0] || null
-    } catch (error) {
-      console.error('Error creating user:', error)
-      return null
-    }
-  },
+      async createUser(user: Omit<User, 'created_at' | 'updated_at'>): Promise<User | null> {
+      try {
+        const result = await sql`
+          INSERT INTO users (id, email, name, image, email_verified)
+          VALUES (${user.id}, ${user.email}, ${user.name}, ${user.image}, ${user.email_verified ? user.email_verified.toISOString() : null})
+          RETURNING *
+        `
+        return (result.rows[0] as User) || null
+      } catch (error) {
+        console.error('Error creating user:', error)
+        return null
+      }
+    },
 
   async updateUser(id: string, updates: Partial<User>): Promise<User | null> {
     try {
@@ -83,7 +83,7 @@ export const db = {
       const query = `UPDATE users SET ${setClause} WHERE id = $1 RETURNING *`
       
       const result = await sql.query(query, [id, ...values])
-      return result.rows[0] || null
+      return (result.rows[0] as User) || null
     } catch (error) {
       console.error('Error updating user:', error)
       return null
@@ -96,7 +96,7 @@ export const db = {
       const result = await sql`
         SELECT * FROM subscriptions WHERE user_id = ${userId}
       `
-      return result.rows[0] || null
+      return (result.rows[0] as Subscription) || null
     } catch (error) {
       console.error('Error getting subscription by user ID:', error)
       return null
@@ -108,7 +108,7 @@ export const db = {
       const result = await sql`
         SELECT * FROM subscriptions WHERE stripe_subscription_id = ${stripeSubscriptionId}
       `
-      return result.rows[0] || null
+      return (result.rows[0] as Subscription) || null
     } catch (error) {
       console.error('Error getting subscription by Stripe ID:', error)
       return null
@@ -126,12 +126,12 @@ export const db = {
         VALUES (
           ${subscription.id}, ${subscription.user_id}, ${subscription.stripe_customer_id},
           ${subscription.stripe_subscription_id}, ${subscription.stripe_price_id},
-          ${subscription.status}, ${subscription.current_period_start},
-          ${subscription.current_period_end}, ${subscription.cancel_at_period_end}
+          ${subscription.status}, ${subscription.current_period_start ? subscription.current_period_start.toISOString() : null},
+          ${subscription.current_period_end ? subscription.current_period_end.toISOString() : null}, ${subscription.cancel_at_period_end}
         )
         RETURNING *
       `
-      return result.rows[0] || null
+      return (result.rows[0] as Subscription) || null
     } catch (error) {
       console.error('Error creating subscription:', error)
       return null
@@ -147,7 +147,7 @@ export const db = {
       const query = `UPDATE subscriptions SET ${setClause} WHERE id = $1 RETURNING *`
       
       const result = await sql.query(query, [id, ...values])
-      return result.rows[0] || null
+      return (result.rows[0] as Subscription) || null
     } catch (error) {
       console.error('Error updating subscription:', error)
       return null
@@ -162,7 +162,7 @@ export const db = {
         VALUES (${userId}, ${action}, ${details ? JSON.stringify(details) : null})
         RETURNING *
       `
-      return result.rows[0] || null
+      return (result.rows[0] as UsageLog) || null
     } catch (error) {
       console.error('Error logging usage:', error)
       return null
@@ -196,7 +196,7 @@ export const db = {
       const schema = fs.readFileSync(schemaPath, 'utf8')
       
       // Split by semicolon and execute each statement
-      const statements = schema.split(';').filter(stmt => stmt.trim())
+      const statements = schema.split(';').filter((stmt: string) => stmt.trim())
       
       for (const statement of statements) {
         if (statement.trim()) {

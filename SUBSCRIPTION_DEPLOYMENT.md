@@ -18,6 +18,7 @@ This guide will help you deploy the Claude Code IDE with subscription functional
 ## Step 2: Configure Stripe
 
 ### Create Product and Price
+
 1. Go to Stripe Dashboard → Products
 2. Click "Add product"
 3. Name: "Claude Code IDE Pro"
@@ -26,12 +27,13 @@ This guide will help you deploy the Claude Code IDE with subscription functional
 6. Save and copy the Price ID (starts with `price_`)
 
 ### Set up Webhook Endpoint
+
 1. Go to Stripe Dashboard → Webhooks
 2. Click "Add endpoint"
 3. Endpoint URL: `https://your-vercel-domain.vercel.app/api/stripe/webhooks`
 4. Select these events:
    - `customer.subscription.created`
-   - `customer.subscription.updated` 
+   - `customer.subscription.updated`
    - `customer.subscription.deleted`
    - `invoice.payment_succeeded`
    - `invoice.payment_failed`
@@ -43,6 +45,7 @@ This guide will help you deploy the Claude Code IDE with subscription functional
 Go to your Vercel project settings → Environment Variables and add:
 
 ### Database (from Vercel PostgreSQL)
+
 ```
 # Recommended for most uses
 DATABASE_URL=postgres://neondb_owner:npg_OzG3NqM6RXDd@ep-wild-dew-adq7m58t-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require
@@ -74,12 +77,14 @@ STACK_SECRET_SERVER_KEY=ssk_g6ehjra38q2pv58p5wg26mcz687fk7wejz06m0676efw0
 ```
 
 ### Authentication
+
 ```
 NEXTAUTH_URL=https://your-vercel-domain.vercel.app
 NEXTAUTH_SECRET=your-super-secret-key-here-minimum-32-characters
 ```
 
 ### Stripe (Replace with your actual Stripe keys)
+
 ```
 STRIPE_SECRET_KEY=sk_test_... (use sk_live_ for production)
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_... (use pk_live_ for production)
@@ -88,6 +93,7 @@ STRIPE_PRICE_ID=price_...
 ```
 
 ### AI Configuration (existing)
+
 ```
 AI_PROVIDER=perplexity
 AI_MODEL=llama-3.1-sonar-small-128k-online
@@ -97,6 +103,7 @@ PERPLEXITY_BASE_URL=https://api.perplexity.ai
 ```
 
 ### App Configuration
+
 ```
 NEXT_PUBLIC_APP_NAME=Claude Code IDE
 NEXT_PUBLIC_SUBSCRIPTION_PRICE=29.00
@@ -104,12 +111,14 @@ NEXT_PUBLIC_SUBSCRIPTION_CURRENCY=USD
 ```
 
 ### Authentication
+
 ```
 NEXTAUTH_URL=https://your-vercel-domain.vercel.app
 NEXTAUTH_SECRET=your-super-secret-key-here-minimum-32-characters
 ```
 
 ### Stripe
+
 ```
 STRIPE_SECRET_KEY=sk_test_... (use sk_live_ for production)
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_... (use pk_live_ for production)
@@ -118,6 +127,7 @@ STRIPE_PRICE_ID=price_...
 ```
 
 ### AI Configuration (existing)
+
 ```
 AI_PROVIDER=perplexity
 AI_MODEL=llama-3.1-sonar-small-128k-online
@@ -127,6 +137,7 @@ PERPLEXITY_BASE_URL=https://api.perplexity.ai
 ```
 
 ### App Configuration
+
 ```
 NEXT_PUBLIC_APP_NAME=Claude Code IDE
 NEXT_PUBLIC_SUBSCRIPTION_PRICE=29.00
@@ -136,11 +147,13 @@ NEXT_PUBLIC_SUBSCRIPTION_CURRENCY=USD
 ## Step 4: Deploy to Vercel
 
 ### Option A: Deploy from GitHub
+
 1. Push your code to GitHub
 2. Connect GitHub repository to Vercel
 3. Deploy will start automatically
 
 ### Option B: Deploy with Vercel CLI
+
 ```bash
 npm install -g vercel
 vercel --prod
@@ -149,11 +162,13 @@ vercel --prod
 ## Step 5: Initialize Database
 
 After deployment, initialize the database by visiting:
+
 ```
 https://your-vercel-domain.vercel.app/api/db/init
 ```
 
 Or make a POST request:
+
 ```bash
 curl -X POST https://your-vercel-domain.vercel.app/api/db/init
 ```
@@ -168,6 +183,7 @@ curl -X POST https://your-vercel-domain.vercel.app/api/db/init
 ## Step 7: Test the Integration
 
 ### Test in Development Mode (Stripe Test Mode)
+
 1. Create a test user account
 2. Go to pricing page
 3. Use test card: `4242 4242 4242 4242`
@@ -175,7 +191,9 @@ curl -X POST https://your-vercel-domain.vercel.app/api/db/init
 5. Verify subscription status updates
 
 ### Test Webhook Handling
+
 Use Stripe CLI to test webhooks:
+
 ```bash
 stripe listen --forward-to https://your-vercel-domain.vercel.app/api/stripe/webhooks
 stripe trigger checkout.session.completed
@@ -186,6 +204,7 @@ stripe trigger checkout.session.completed
 Before going live with real payments:
 
 ### Stripe Configuration
+
 - [ ] Switch to Stripe Live mode
 - [ ] Update `STRIPE_SECRET_KEY` to live key (`sk_live_...`)
 - [ ] Update `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` to live key (`pk_live_...`)
@@ -193,6 +212,7 @@ Before going live with real payments:
 - [ ] Test with real payment methods
 
 ### Security Review
+
 - [ ] Verify all environment variables are set correctly
 - [ ] Test webhook signature verification
 - [ ] Verify HTTPS is enforced
@@ -200,6 +220,7 @@ Before going live with real payments:
 - [ ] Test payment failure scenarios
 
 ### Monitoring
+
 - [ ] Set up Vercel analytics
 - [ ] Monitor Stripe webhook delivery
 - [ ] Set up error tracking (optional)
@@ -209,26 +230,31 @@ Before going live with real payments:
 ### Common Issues
 
 **Database Connection Error**
+
 - Verify all database environment variables are correct
 - Ensure database is accessible from Vercel
 
 **Webhook Verification Failed**
+
 - Check webhook signing secret matches Stripe dashboard
 - Verify webhook URL is correct
 - Check Vercel function logs
 
 **Checkout Session Creation Failed**
+
 - Verify Stripe keys are correct
 - Check Price ID exists in Stripe
 - Verify customer creation
 
 **Authentication Issues**
+
 - Verify `NEXTAUTH_SECRET` is set and long enough
 - Check `NEXTAUTH_URL` matches your domain
 
 ### Debug Commands
 
 Check API endpoints:
+
 ```bash
 # Health checks
 curl https://your-domain.vercel.app/api/stripe/checkout
@@ -240,6 +266,7 @@ curl -X POST https://your-domain.vercel.app/api/db/init
 ```
 
 ### Vercel Function Logs
+
 Monitor logs in Vercel dashboard → Functions tab to debug issues.
 
 ## Support

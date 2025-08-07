@@ -4,7 +4,7 @@ import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { Check, Zap, Code, Terminal, Github, Crown } from 'lucide-react'
-import { getStripeClient } from '@/lib/stripe'
+import { loadStripe } from '@stripe/stripe-js'
 
 function PricingContent() {
   const { isAuthenticated, hasActiveSubscription } = useAuth()
@@ -42,12 +42,11 @@ function PricingContent() {
         throw new Error(error.error || 'Failed to create checkout session')
       }
 
-      const { sessionId } = await response.json()
+      const { url } = await response.json()
       
       // Redirect to Stripe Checkout
-      const stripe = await getStripeClient()
-      if (stripe) {
-        await stripe.redirectToCheckout({ sessionId })
+      if (url) {
+        window.location.href = url
       }
     } catch (error) {
       console.error('Subscription error:', error)
@@ -74,7 +73,7 @@ function PricingContent() {
         {cancelled && (
           <div className="mb-8 bg-yellow-50 border border-yellow-200 rounded-md p-4 text-center">
             <p className="text-yellow-800">
-              Subscription cancelled. You can always come back when you're ready!
+              Subscription cancelled. You can always come back when you&apos;re ready!
             </p>
           </div>
         )}
@@ -244,7 +243,7 @@ function PricingContent() {
           {!isAuthenticated && (
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 max-w-md mx-auto">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Don't have an account yet?
+                Don&apos;t have an account yet?
               </p>
               <button
                 onClick={() => router.push('/auth/signin')}

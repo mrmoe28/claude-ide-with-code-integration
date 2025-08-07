@@ -145,7 +145,7 @@ export default function SignIn() {
         
         <div className="text-center text-sm text-light-text-muted dark:text-dark-text-muted">
           <p>
-            {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+            {isSignUp ? 'Already have an account?' : "Don&apos;t have an account?"}{' '}
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}

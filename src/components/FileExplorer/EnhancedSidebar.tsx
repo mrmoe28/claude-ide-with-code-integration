@@ -310,8 +310,9 @@ export function EnhancedSidebar({ onFileSelect, selectedFile }: EnhancedSidebarP
                 <button
                   onClick={() => closeTab(tab.id)}
                   className="p-1 hover:bg-light-bg-tertiary dark:hover:bg-dark-bg-tertiary
-                           text-light-text-muted dark:text-dark-text-muted 
+                           text-light-text-muted dark:text-dark-text-muted
                            hover:text-light-text-primary dark:hover:text-dark-text-primary"
+                  title={`Close ${tab.name} tab`}
                 >
                   <X size={12} />
                 </button>

@@ -49,7 +49,12 @@ const getClaudePath = () => {
 
 // Debug function to test Claude CLI detection
 const debugClaudeDetection = () => {
-  const debug = {
+  const debug: {
+    currentPath: string | undefined
+    claudePath: string | null
+    error: string | null
+    testResults: Record<string, string>
+  } = {
     currentPath: process.env.PATH,
     claudePath: null,
     error: null,

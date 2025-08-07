@@ -9,7 +9,11 @@
     "lint": "next lint",
     "analyze": "ANALYZE=true npm run build",
     "analyze:server": "BUNDLE_ANALYZE=server npm run build",
-    "analyze:browser": "BUNDLE_ANALYZE=browser npm run build"
+    "analyze:browser": "BUNDLE_ANALYZE=browser npm run build",
+    "deploy": "./scripts/deploy-subscription.sh",
+    "test:deployment": "./scripts/test-deployment.sh",
+    "setup:stripe": "stripe login && echo 'Stripe CLI configured'",
+    "setup:vercel": "vercel login && echo 'Vercel CLI configured'"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

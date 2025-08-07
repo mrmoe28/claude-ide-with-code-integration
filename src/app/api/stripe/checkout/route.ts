@@ -34,11 +34,11 @@ export async function POST(request: NextRequest) {
     
     if (!user) {
       user = await db.createUser({
-        id: session.user.id || session.user.email,
-        email: session.user.email,
+        id: (session.user as any).id || session.user.email || '',
+        email: session.user.email || '',
         name: session.user.name || undefined,
         image: session.user.image || undefined,
-        email_verified: session.user.emailVerified ? new Date() : undefined,
+        email_verified: (session.user as any).emailVerified ? new Date() : undefined,
       })
     }
 

@@ -205,6 +205,7 @@ export function WindowManager({
                         <button 
                           onClick={toggleTerminal}
                           className="p-1 rounded hover:bg-light-bg-tertiary dark:hover:bg-dark-bg-tertiary"
+                          title="Close Terminal"
                         >
                           <X size={12} className="text-light-text-muted dark:text-dark-text-muted" />
                         </button>
@@ -268,9 +269,10 @@ export function WindowManager({
                         <Minimize2 size={12} className="text-light-text-muted dark:text-dark-text-muted" />
                       )}
                     </button>
-                    <button 
+                    <button
                       onClick={toggleChat}
                       className="p-1 rounded hover:bg-light-bg-tertiary dark:hover:bg-dark-bg-tertiary"
+                      title="Close Chat Panel"
                     >
                       <X size={12} className="text-light-text-muted dark:text-dark-text-muted" />
                     </button>

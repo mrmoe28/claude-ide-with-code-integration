@@ -68,14 +68,14 @@ export const authOptions: NextAuthOptions = {
             // In a real implementation, you'd want to add password fields to the database
 
             // Check subscription status
-            const hasActiveSubscription = await hasActiveSubscription(user.id)
+            const isSubscriptionActive = await hasActiveSubscription(user.id)
 
-            return {
-              id: user.id,
-              email: user.email,
-              name: user.name,
-              hasActiveSubscription
-            }
+                          return {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                hasActiveSubscription: isSubscriptionActive
+              }
           }
         } catch (error) {
           console.error("Auth error:", error)
@@ -88,8 +88,8 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, token }) {
       if (session?.user && token) {
-        session.user.id = token.sub as string
-        session.user.hasActiveSubscription = token.hasActiveSubscription as boolean
+        (session.user as any).id = token.sub as string
+        (session.user as any).hasActiveSubscription = token.hasActiveSubscription as boolean
       }
       return session
     },

@@ -69,9 +69,9 @@ export async function POST(request: NextRequest) {
           // Update existing subscription
           await db.updateSubscription(existingSubscription.id, {
             status: mapStripeStatusToDbStatus(subscription.status),
-            current_period_start: new Date(subscription.current_period_start * 1000),
-            current_period_end: new Date(subscription.current_period_end * 1000),
-            cancel_at_period_end: subscription.cancel_at_period_end || false,
+            current_period_start: new Date((subscription as any).current_period_start * 1000),
+            current_period_end: new Date((subscription as any).current_period_end * 1000),
+            cancel_at_period_end: (subscription as any).cancel_at_period_end || false,
           })
         } else {
           // Create new subscription record
@@ -85,9 +85,9 @@ export async function POST(request: NextRequest) {
               stripe_subscription_id: subscription.id,
               stripe_price_id: subscription.items.data[0]?.price.id,
               status: mapStripeStatusToDbStatus(subscription.status),
-              current_period_start: new Date(subscription.current_period_start * 1000),
-              current_period_end: new Date(subscription.current_period_end * 1000),
-              cancel_at_period_end: subscription.cancel_at_period_end || false,
+              current_period_start: new Date((subscription as any).current_period_start * 1000),
+              current_period_end: new Date((subscription as any).current_period_end * 1000),
+              cancel_at_period_end: (subscription as any).cancel_at_period_end || false,
             })
           }
         }
@@ -110,14 +110,14 @@ export async function POST(request: NextRequest) {
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice
         
-        if (invoice.subscription) {
-          const existingSubscription = await db.getSubscriptionByStripeId(invoice.subscription as string)
+        if ((invoice as any).subscription) {
+          const existingSubscription = await db.getSubscriptionByStripeId((invoice as any).subscription as string)
           
           if (existingSubscription) {
             await db.updateSubscription(existingSubscription.id, {
               status: 'active',
-              current_period_start: new Date(invoice.period_start * 1000),
-              current_period_end: new Date(invoice.period_end * 1000),
+              current_period_start: new Date((invoice as any).period_start * 1000),
+              current_period_end: new Date((invoice as any).period_end * 1000),
             })
           }
         }
@@ -127,8 +127,8 @@ export async function POST(request: NextRequest) {
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice
         
-        if (invoice.subscription) {
-          const existingSubscription = await db.getSubscriptionByStripeId(invoice.subscription as string)
+        if ((invoice as any).subscription) {
+          const existingSubscription = await db.getSubscriptionByStripeId((invoice as any).subscription as string)
           
           if (existingSubscription) {
             await db.updateSubscription(existingSubscription.id, {

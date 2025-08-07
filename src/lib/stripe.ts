@@ -1,16 +1,14 @@
 import Stripe from 'stripe'
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set')
-}
-
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-12-18.acacia',
-  typescript: true,
-})
+export const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-07-30.basil',
+      typescript: true,
+    })
+  : null
 
 export const STRIPE_CONFIG = {
-  priceId: process.env.STRIPE_PRICE_ID || 'price_1OqXqXqXqXqXqXqXqXqXqXqX',
+  priceId: process.env.STRIPE_PRICE_ID || 'price_1RtcNFEUI4iqGSxZeBA6PGt6',
   currency: 'usd',
   subscriptionName: 'Claude Code IDE Pro',
   trialPeriodDays: 0, // No free trial
@@ -30,6 +28,9 @@ export type StripeWebhookEvent = typeof STRIPE_WEBHOOK_EVENTS[number]
 
 // Utility functions
 export async function createCustomer(email: string, name?: string) {
+  if (!stripe) {
+    throw new Error('Stripe is not configured')
+  }
   return await stripe.customers.create({
     email,
     name,
@@ -40,6 +41,9 @@ export async function createCustomer(email: string, name?: string) {
 }
 
 export async function createCheckoutSession(customerId: string, successUrl: string, cancelUrl: string) {
+  if (!stripe) {
+    throw new Error('Stripe is not configured')
+  }
   return await stripe.checkout.sessions.create({
     customer: customerId,
     payment_method_types: ['card'],
@@ -61,6 +65,9 @@ export async function createCheckoutSession(customerId: string, successUrl: stri
 }
 
 export async function createPortalSession(customerId: string, returnUrl: string) {
+  if (!stripe) {
+    throw new Error('Stripe is not configured')
+  }
   return await stripe.billingPortal.sessions.create({
     customer: customerId,
     return_url: returnUrl,
@@ -68,16 +75,25 @@ export async function createPortalSession(customerId: string, returnUrl: string)
 }
 
 export async function getSubscription(subscriptionId: string) {
+  if (!stripe) {
+    throw new Error('Stripe is not configured')
+  }
   return await stripe.subscriptions.retrieve(subscriptionId)
 }
 
 export async function cancelSubscription(subscriptionId: string) {
+  if (!stripe) {
+    throw new Error('Stripe is not configured')
+  }
   return await stripe.subscriptions.update(subscriptionId, {
     cancel_at_period_end: true,
   })
 }
 
 export async function reactivateSubscription(subscriptionId: string) {
+  if (!stripe) {
+    throw new Error('Stripe is not configured')
+  }
   return await stripe.subscriptions.update(subscriptionId, {
     cancel_at_period_end: false,
   })
@@ -91,6 +107,9 @@ export function constructWebhookEvent(payload: string, signature: string) {
     throw new Error('STRIPE_WEBHOOK_SECRET is not set')
   }
   
+  if (!stripe) {
+    throw new Error('Stripe is not configured')
+  }
   return stripe.webhooks.constructEvent(payload, signature, webhookSecret)
 }
 
@@ -120,6 +139,9 @@ export function formatCurrency(amount: number, currency: string = 'usd'): string
 
 // Get subscription price details
 export async function getPriceDetails(priceId: string) {
+  if (!stripe) {
+    throw new Error('Stripe is not configured')
+  }
   try {
     const price = await stripe.prices.retrieve(priceId)
     return {

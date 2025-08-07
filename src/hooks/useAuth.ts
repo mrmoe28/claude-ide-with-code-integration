@@ -1,17 +1,17 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 
 export function useAuth() {
   const { data: session, status } = useSession()
   
   const isLoading = status === 'loading'
   const isAuthenticated = !!session?.user
-  const hasActiveSubscription = session?.user?.hasActiveSubscription || false
+  const hasActiveSubscription = (session?.user as any)?.hasActiveSubscription || false
 
   return {
     user: session?.user ? {
-      id: session.user.id,
+      id: (session.user as any).id,
       email: session.user.email,
       name: session.user.name,
       hasActiveSubscription
@@ -20,6 +20,7 @@ export function useAuth() {
     isAuthenticated,
     hasActiveSubscription,
     session,
-    status
+    status,
+    signOut
   }
 }

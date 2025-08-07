@@ -167,7 +167,7 @@ export function Header({
                 <User size={14} className="text-white" />
               </div>
               <span className="text-sm font-medium hidden sm:block">
-                {user.username}
+                {user.name || user.email}
               </span>
             </button>
 
@@ -180,10 +180,10 @@ export function Header({
                               rounded-md shadow-lg py-1">
                   <div className="px-3 py-2 border-b border-light-border-primary dark:border-dark-border-primary">
                     <p className="text-sm font-medium text-light-text-primary dark:text-dark-text-primary">
-                      {user.username}
+                      {user.name || user.email}
                     </p>
                     <p className="text-xs text-light-text-secondary dark:text-dark-text-secondary">
-                      Signed in {new Date(user.signedInAt).toLocaleDateString()}
+                      {user.hasActiveSubscription ? 'Pro Member' : 'Free User'}
                     </p>
                   </div>
 
