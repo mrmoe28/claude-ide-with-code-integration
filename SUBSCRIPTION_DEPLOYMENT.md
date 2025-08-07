@@ -83,13 +83,13 @@ NEXTAUTH_URL=https://your-vercel-domain.vercel.app
 NEXTAUTH_SECRET=your-super-secret-key-here-minimum-32-characters
 ```
 
-### Stripe (Replace with your actual Stripe keys)
+### Stripe (Production Keys)
 
 ```
-STRIPE_SECRET_KEY=sk_test_... (use sk_live_ for production)
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_... (use pk_live_ for production)
-STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_PRICE_ID=price_...
+STRIPE_SECRET_KEY=sk_live_... (your live Stripe secret key)
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_... (get from Stripe dashboard)
+STRIPE_WEBHOOK_SECRET=whsec_... (get from Stripe webhook settings)
+STRIPE_PRICE_ID=price_1RtcNFEUI4iqGSxZeBA6PGt6
 ```
 
 ### AI Configuration (existing)
@@ -117,13 +117,13 @@ NEXTAUTH_URL=https://your-vercel-domain.vercel.app
 NEXTAUTH_SECRET=your-super-secret-key-here-minimum-32-characters
 ```
 
-### Stripe
+### Stripe (Production Keys)
 
 ```
-STRIPE_SECRET_KEY=sk_test_... (use sk_live_ for production)
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_... (use pk_live_ for production)
-STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_PRICE_ID=price_...
+STRIPE_SECRET_KEY=sk_live_... (your live Stripe secret key)
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_... (get from Stripe dashboard)
+STRIPE_WEBHOOK_SECRET=whsec_... (get from Stripe webhook settings)
+STRIPE_PRICE_ID=price_1RtcNFEUI4iqGSxZeBA6PGt6
 ```
 
 ### AI Configuration (existing)
