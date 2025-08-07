@@ -4,8 +4,17 @@
   "installCommand": "npm install",
   "framework": "nextjs",
   "functions": {
-    "src/app/api/**/*.ts": {
+    "src/app/api/stripe/webhooks/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/stripe/checkout/route.ts": {
       "maxDuration": 30
+    },
+    "src/app/api/stripe/portal/route.ts": {
+      "maxDuration": 30
+    },
+    "src/app/api/**/*.ts": {
+      "maxDuration": 10
     }
   },
   "headers": [

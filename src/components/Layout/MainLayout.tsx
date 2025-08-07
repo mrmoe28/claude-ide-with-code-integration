@@ -5,9 +5,10 @@ import { useAuth } from '@/hooks/useAuth'
 import { useFileSystem } from '@/hooks/useFileSystem'
 import { Header } from './Header'
 import { WindowManager } from './WindowManager'
+import { Paywall } from '@/components/Subscription/Paywall'
 
 export function MainLayout() {
-  const { user, isLoading, isAuthenticated } = useAuth()
+  const { user, isLoading, isAuthenticated, hasActiveSubscription } = useAuth()
   const { directoryName } = useFileSystem()
   const [currentFile, setCurrentFile] = useState<{ path: string; content: string } | undefined>()
   
@@ -105,6 +106,18 @@ export function MainLayout() {
             Sign in
           </a>
         </div>
+      </div>
+    )
+  }
+
+  // Show paywall for authenticated users without subscription
+  if (!hasActiveSubscription) {
+    return (
+      <div className="w-screen h-screen bg-light-bg-primary dark:bg-dark-bg-primary">
+        <Paywall 
+          feature="Claude Code IDE"
+          description="You need a Pro subscription to access the full IDE experience."
+        />
       </div>
     )
   }

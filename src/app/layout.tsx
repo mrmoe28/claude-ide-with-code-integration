@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Providers } from "@/components/Providers";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { SessionWrapper } from "@/components/SessionWrapper";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,11 +33,13 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className="w-screen h-screen">
       <body className={`${inter.variable} font-sans antialiased w-screen h-screen`}>
         <ErrorBoundary>
-          <Providers>
-            <ThemeProvider>
-              {children}
-            </ThemeProvider>
-          </Providers>
+          <SessionWrapper>
+            <Providers>
+              <ThemeProvider>
+                {children}
+              </ThemeProvider>
+            </Providers>
+          </SessionWrapper>
         </ErrorBoundary>
       </body>
     </html>

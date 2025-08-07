@@ -1,41 +1,25 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-
-interface User {
-  username: string
-  id: string
-  signedInAt: string
-}
+import { useSession } from 'next-auth/react'
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    // Check for existing session on mount
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch (error) {
-        console.error('Error parsing stored user:', error)
-        localStorage.removeItem('user')
-      }
-    }
-    setIsLoading(false)
-  }, [])
-
-  const signOut = () => {
-    localStorage.removeItem('user')
-    setUser(null)
-    window.location.href = '/auth/signin'
-  }
+  const { data: session, status } = useSession()
+  
+  const isLoading = status === 'loading'
+  const isAuthenticated = !!session?.user
+  const hasActiveSubscription = session?.user?.hasActiveSubscription || false
 
   return {
-    user,
+    user: session?.user ? {
+      id: session.user.id,
+      email: session.user.email,
+      name: session.user.name,
+      hasActiveSubscription
+    } : null,
     isLoading,
-    isAuthenticated: !!user,
-    signOut
+    isAuthenticated,
+    hasActiveSubscription,
+    session,
+    status
   }
 }

@@ -5,24 +5,66 @@ import { join } from 'path'
 // Get Claude executable path
 const getClaudePath = () => {
   try {
+    // First try with the current PATH
     return execSync('which claude', { encoding: 'utf8' }).trim()
   } catch (error) {
-    // Fallback to common paths
+    // Fallback to common paths with explicit PATH
     const commonPaths = [
       '/Users/ekodevapps/.nvm/versions/node/v24.4.1/bin/claude',
       '/usr/local/bin/claude',
       '/opt/homebrew/bin/claude'
     ]
+    
+    // Try with explicit PATH that includes nvm
+    const fullPath = '/Users/ekodevapps/.nvm/versions/node/v24.4.1/bin:/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin'
+    
     for (const path of commonPaths) {
       try {
-        execSync(`test -f "${path}"`, { stdio: 'ignore' })
+        execSync(`test -f "${path}"`, { 
+          stdio: 'ignore',
+          env: { ...process.env, PATH: fullPath }
+        })
         return path
       } catch {
         continue
       }
     }
+    
+    // Last resort: try to find it in the system
+    try {
+      const result = execSync('find /usr/local/bin /opt/homebrew/bin /Users/ekodevapps/.nvm/versions/node -name claude 2>/dev/null | head -1', { 
+        encoding: 'utf8',
+        env: { ...process.env, PATH: fullPath }
+      })
+      if (result.trim()) {
+        return result.trim()
+      }
+    } catch {
+      // Ignore find errors
+    }
+    
     throw new Error('Claude executable not found')
   }
+}
+
+// Debug function to test Claude CLI detection
+const debugClaudeDetection = () => {
+  const debug = {
+    currentPath: process.env.PATH,
+    claudePath: null,
+    error: null,
+    testResults: {}
+  }
+  
+  try {
+    debug.claudePath = getClaudePath()
+    debug.testResults.which = execSync('which claude', { encoding: 'utf8' }).trim()
+    debug.testResults.version = execSync('claude --version', { encoding: 'utf8' }).trim()
+  } catch (error) {
+    debug.error = error instanceof Error ? error.message : String(error)
+  }
+  
+  return debug
 }
 
 // Store active Claude Code sessions
@@ -106,7 +148,9 @@ export async function POST(request: NextRequest) {
             cwd: workingDirectory,
             env: {
               ...process.env,
-              PATH: process.env.PATH || '/Users/ekodevapps/.nvm/versions/node/v24.4.1/bin:/usr/local/bin:/usr/bin:/bin',
+              PATH: '/Users/ekodevapps/.nvm/versions/node/v24.4.1/bin:/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin',
+              HOME: process.env.HOME || '/Users/ekodevapps',
+              SHELL: process.env.SHELL || '/bin/zsh',
               CLAUDE_CODE_SESSION_ID: sessionId,
               // Pass context as environment variables if needed
               CLAUDE_CODE_CONTEXT: JSON.stringify(context)
@@ -248,6 +292,19 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const sessionId = searchParams.get('sessionId')
+    const debug = searchParams.get('debug')
+
+    // Debug endpoint to test Claude CLI detection
+    if (debug === 'true') {
+      const debugInfo = debugClaudeDetection()
+      return new Response(JSON.stringify({
+        debug: debugInfo,
+        success: true
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
 
     if (sessionId) {
       const session = activeSessions.get(sessionId)
