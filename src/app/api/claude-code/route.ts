@@ -196,15 +196,19 @@ export async function POST(request: NextRequest) {
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error'
           let helpfulMessage = `Failed to start Claude Code: ${errorMessage}`
+          let errorType = 'error'
           
-          if (errorMessage.includes('ENOENT') || errorMessage.includes('not found')) {
+          if (errorMessage.includes('ENOENT') || errorMessage.includes('not found') || errorMessage.includes('Claude executable not found')) {
             helpfulMessage = `Claude Code CLI not found. Please install it with: npm install -g @anthropic-ai/claude`
+            errorType = 'setup_required'
           }
           
           safeEnqueue(`data: ${JSON.stringify({
-            type: 'error',
+            type: errorType,
             content: helpfulMessage,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            setupRequired: errorType === 'setup_required',
+            autoInstallAvailable: true
           })}\n\n`)
           cleanup()
         }

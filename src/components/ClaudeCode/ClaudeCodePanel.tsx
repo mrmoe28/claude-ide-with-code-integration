@@ -1,17 +1,20 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Send, Square, RotateCcw, Terminal, Code, FileText } from 'lucide-react'
+import { Send, Square, RotateCcw, Terminal, Code, FileText, Settings } from 'lucide-react'
+import { ClaudeSetupModal } from '../Setup/ClaudeSetupModal'
 
 interface ClaudeCodeMessage {
   id: string
-  type: 'user' | 'assistant' | 'system' | 'error'
+  type: 'user' | 'assistant' | 'system' | 'error' | 'setup_required'
   content: string
   timestamp: number
   metadata?: {
     exitCode?: number
     sessionId?: string
     files?: string[]
+    setupRequired?: boolean
+    autoInstallAvailable?: boolean
   }
 }
 
@@ -33,6 +36,8 @@ export function ClaudeCodePanel({
   const [isLoading, setIsLoading] = useState(false)
   const [sessionId] = useState(() => `session-${Date.now()}-${Math.random().toString(36).substring(7)}`)
   const [eventSource, setEventSource] = useState<EventSource | null>(null)
+  const [showSetupModal, setShowSetupModal] = useState(false)
+  const [setupRequired, setSetupRequired] = useState(false)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -184,6 +189,19 @@ export function ClaudeCodePanel({
                   })
                   break
 
+                case 'setup_required':
+                  setSetupRequired(true)
+                  addMessage({
+                    type: 'setup_required',
+                    content: data.content,
+                    timestamp: data.timestamp || Date.now(),
+                    metadata: {
+                      setupRequired: data.setupRequired,
+                      autoInstallAvailable: data.autoInstallAvailable
+                    }
+                  })
+                  break
+
                 case 'completed':
                   addMessage({
                     type: 'system',
@@ -253,6 +271,23 @@ export function ClaudeCodePanel({
     }
   }
 
+  const openSetupModal = () => {
+    setShowSetupModal(true)
+  }
+
+  const closeSetupModal = () => {
+    setShowSetupModal(false)
+  }
+
+  const handleSetupSuccess = () => {
+    setSetupRequired(false)
+    addMessage({
+      type: 'system',
+      content: 'Claude CLI setup completed successfully! You can now use Claude Code.',
+      timestamp: Date.now()
+    })
+  }
+
   const renderMessage = (message: ClaudeCodeMessage) => {
     const getMessageIcon = () => {
       switch (message.type) {
@@ -264,6 +299,8 @@ export function ClaudeCodePanel({
           return <Terminal className="w-4 h-4 text-yellow-500" />
         case 'error':
           return <div className="w-2 h-2 rounded-full bg-red-500" />
+        case 'setup_required':
+          return <Settings className="w-4 h-4 text-orange-500" />
         default:
           return <FileText className="w-4 h-4 text-gray-500" />
       }
@@ -279,6 +316,8 @@ export function ClaudeCodePanel({
           return 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
         case 'error':
           return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+        case 'setup_required':
+          return 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
         default:
           return 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800'
       }
@@ -303,6 +342,17 @@ export function ClaudeCodePanel({
             <div className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap font-mono text-sm">
               {message.content}
             </div>
+            {message.type === 'setup_required' && message.metadata?.autoInstallAvailable && (
+              <div className="mt-4">
+                <button
+                  onClick={openSetupModal}
+                  className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+                >
+                  <Settings className="w-4 h-4 inline mr-2" />
+                  Setup Claude CLI
+                </button>
+              </div>
+            )}
             {message.metadata && (
               <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                 {message.metadata.exitCode !== undefined && (
@@ -320,9 +370,10 @@ export function ClaudeCodePanel({
   }
 
   return (
-    <div className={`flex flex-col h-full bg-white dark:bg-gray-900 ${className}`}>
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+    <>
+      <div className={`flex flex-col h-full bg-white dark:bg-gray-900 ${className}`}>
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-2">
           <Code className="w-5 h-5 text-blue-500" />
           <h2 className="font-semibold text-gray-900 dark:text-gray-100">
@@ -335,6 +386,16 @@ export function ClaudeCodePanel({
           )}
         </div>
         <div className="flex items-center gap-2">
+          {setupRequired && (
+            <button
+              onClick={openSetupModal}
+              className="p-2 text-orange-500 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-200 
+                       hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-md transition-colors duration-200"
+              title="Setup Claude CLI"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          )}
           <button
             onClick={clearChat}
             disabled={isLoading}
@@ -420,6 +481,14 @@ export function ClaudeCodePanel({
           <span>Session: {sessionId.substring(0, 8)}...</span>
         </div>
       </div>
-    </div>
+      </div>
+
+      {/* Setup Modal */}
+      <ClaudeSetupModal
+        isOpen={showSetupModal}
+        onClose={closeSetupModal}
+        onSuccess={handleSetupSuccess}
+      />
+    </>
   )
 }

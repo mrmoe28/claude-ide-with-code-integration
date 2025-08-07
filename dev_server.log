@@ -1,33 +1,19 @@
 
-> claude-code-ide@0.1.0 dev
+> claude-code-ide@0.1.1 dev
 > next dev --turbopack
 
- ⚠ Port 3000 is in use by process 26432, using available port 3001 instead.
+ ⚠ Port 3000 is in use by process 79275, using available port 3001 instead.
    ▲ Next.js 15.4.5 (Turbopack)
    - Local:        http://localhost:3001
    - Network:      http://192.168.1.131:3001
+   - Environments: .env.local
    - Experiments (use with caution):
      ⨯ reactCompiler
      · optimizePackageImports
 
  ✓ Starting...
- ✓ Ready in 813ms
+ ✓ Ready in 822ms
  ⚠ Webpack is configured while Turbopack is not, which may cause problems.
  ⚠ See instructions if you need to configure Turbopack:
   https://nextjs.org/docs/app/api-reference/next-config-js/turbopack
 
- ○ Compiling / ...
- ✓ Compiled / in 1832ms
- GET / 200 in 2033ms
- ✓ Compiled /favicon.ico in 210ms
- GET /favicon.ico?favicon.45db1c09.ico 200 in 453ms
- ✓ Compiled in 88ms
- ✓ Compiled in 95ms
- ✓ Compiled in 130ms
- ✓ Compiled in 98ms
- GET / 200 in 54ms
- GET /favicon.ico?favicon.45db1c09.ico 200 in 225ms
-   Reload env: .env.local
-   Reload env: .env.local
-   Reload env: .env.local
-[?25h
