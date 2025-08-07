@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude IDE - Functionality Test</title>
+    <style>
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            max-width: 800px; 
+            margin: 20px auto; 
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 15px; 
+            border: 1px solid #333; 
+            border-radius: 8px;
+            background: #2a2a2a;
+        }
+        .success { color: #4ade80; }
+        .error { color: #ef4444; }
+        .loading { color: #3b82f6; }
+        button { 
+            background: #3b82f6; 
+            color: white; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin: 5px;
+        }
+        button:hover { background: #2563eb; }
+        #chatTest { min-height: 100px; border: 1px solid #333; padding: 10px; margin: 10px 0; }
+        #terminalTest { min-height: 150px; border: 1px solid #333; padding: 10px; margin: 10px 0; font-family: monospace; background: #000; }
+        pre { background: #333; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Claude IDE - Functionality Test</h1>
+    <p>This page tests the core functionality of the Claude IDE.</p>
+    
+    <div class="test-section">
+        <h2>🤖 OpenAI API Test</h2>
+        <button onclick="testOpenAI()">Test Chat API</button>
+        <div id="openAIStatus">Not tested</div>
+        <div id="chatTest"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>💻 Terminal API Test</h2>
+        <button onclick="testTerminal()">Test Terminal Connection</button>
+        <button onclick="sendTerminalCommand()">Send 'ls' Command</button>
+        <div id="terminalStatus">Not tested</div>
+        <div id="terminalTest"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📁 File System Test</h2>
+        <button onclick="testFileAccess()">Test File Access</button>
+        <div id="fileStatus">Not tested</div>
+        <pre id="fileTest"></pre>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Environment Configuration</h2>
+        <div id="envStatus">Checking...</div>
+    </div>
+
+    <script>
+        let terminalSession = null;
+        let terminalEventSource = null;
+
+        // Test OpenAI API
+        async function testOpenAI() {
+            const status = document.getElementById('openAIStatus');
+            const chat = document.getElementById('chatTest');
+            
+            status.innerHTML = '<span class="loading">Testing OpenAI API...</span>';
+            chat.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [{ role: 'user', content: 'Say "API test successful" if you receive this message.' }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    status.innerHTML = '<span class="success">✅ OpenAI API working!</span>';
+                    chat.innerHTML = `<strong>AI Response:</strong><br>${data.content}`;
+                } else {
+                    status.innerHTML = '<span class="error">❌ OpenAI API error</span>';
+                    chat.innerHTML = `<strong>Error:</strong> ${data.error}`;
+                }
+            } catch (error) {
+                status.innerHTML = '<span class="error">❌ Network error</span>';
+                chat.innerHTML = `<strong>Error:</strong> ${error.message}`;
+            }
+        }
+
+        // Test Terminal API
+        async function testTerminal() {
+            const status = document.getElementById('terminalStatus');
+            const terminal = document.getElementById('terminalTest');
+            
+            status.innerHTML = '<span class="loading">Testing terminal connection...</span>';
+            terminal.innerHTML = '';
+            
+            try {
+                // Generate unique session ID
+                terminalSession = 'test_' + Math.random().toString(36).substring(7);
+                
+                // Close existing connection
+                if (terminalEventSource) {
+                    terminalEventSource.close();
+                }
+                
+                // Create new EventSource connection
+                terminalEventSource = new EventSource(`/api/terminal?sessionId=${terminalSession}`);
+                
+                terminalEventSource.onopen = () => {
+                    status.innerHTML = '<span class="success">✅ Terminal connected!</span>';
+                };
+                
+                terminalEventSource.onmessage = (event) => {
+                    const message = JSON.parse(event.data);
+                    if (message.type === 'output') {
+                        terminal.innerHTML += message.data.replace(/\r\n/g, '<br>').replace(/\r/g, '<br>').replace(/\n/g, '<br>');
+                    } else if (message.type === 'connected') {
+                        terminal.innerHTML += `<span class="success">Connected to terminal session: ${message.sessionId}</span><br>`;
+                    }
+                };
+                
+                terminalEventSource.onerror = () => {
+                    status.innerHTML = '<span class="error">❌ Terminal connection failed</span>';
+                };
+                
+            } catch (error) {
+                status.innerHTML = '<span class="error">❌ Terminal error</span>';
+                terminal.innerHTML = `Error: ${error.message}`;
+            }
+        }
+
+        // Send terminal command
+        async function sendTerminalCommand() {
+            if (!terminalSession) {
+                alert('Please test terminal connection first');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/terminal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: terminalSession,
+                        input: 'ls -la\\r'
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    document.getElementById('terminalTest').innerHTML += `<br><span class="error">Command failed: ${data.error}</span>`;
+                }
+            } catch (error) {
+                document.getElementById('terminalTest').innerHTML += `<br><span class="error">Error: ${error.message}</span>`;
+            }
+        }
+
+        // Test file access
+        async function testFileAccess() {
+            const status = document.getElementById('fileStatus');
+            const fileTest = document.getElementById('fileTest');
+            
+            status.innerHTML = '<span class="loading">Testing file access...</span>';
+            
+            try {
+                // This would normally be through a file API endpoint
+                const response = await fetch('/package.json');
+                if (response.ok) {
+                    const packageJson = await response.text();
+                    status.innerHTML = '<span class="success">✅ File access working!</span>';
+                    fileTest.textContent = packageJson.substring(0, 500) + '...';
+                } else {
+                    status.innerHTML = '<span class="error">❌ File access failed</span>';
+                    fileTest.textContent = 'Could not read package.json';
+                }
+            } catch (error) {
+                status.innerHTML = '<span class="error">❌ File access error</span>';
+                fileTest.textContent = error.message;
+            }
+        }
+
+        // Check environment on load
+        function checkEnvironment() {
+            const envStatus = document.getElementById('envStatus');
+            
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: [{ role: 'user', content: 'test' }] })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error && data.error.includes('API key not configured')) {
+                    envStatus.innerHTML = '<span class="error">❌ OpenAI API key not configured</span>';
+                } else {
+                    envStatus.innerHTML = '<span class="success">✅ Environment configured correctly</span>';
+                }
+            })
+            .catch(() => {
+                envStatus.innerHTML = '<span class="error">❌ Cannot check environment</span>';
+            });
+        }
+
+        // Run environment check on page load
+        checkEnvironment();
+    </script>
+</body>
+</html>

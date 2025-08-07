@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Minimal CSS Reset - Only target root elements, let Tailwind handle components */
+@layer base {
+  /* Basic reset without breaking Tailwind classes */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  /* Root elements only - no positioning overrides */
+  html {
+    height: 100vh;
+    height: 100dvh;
+    width: 100vw;
+    width: 100dvw;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    height: 100dvh;
+    width: 100vw;
+    width: 100dvw;
+    overflow: hidden;
+    font-family: 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+    transition: background-color 200ms ease-in-out, color 200ms ease-in-out;
+  }
+
+  /* Next.js root container - minimal styling */
+  #__next {
+    height: 100vh;
+    height: 100dvh;
+    width: 100vw;
+    width: 100dvw;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/* Light theme */
+body {
+  background-color: #ffffff;
+  color: #333333;
+}
+
+/* Dark theme */
+.dark body {
+  background-color: #1e1e1e;
+  color: #cccccc;
+}
+
+/* Light theme */
+body {
+  background-color: #ffffff;
+  color: #333333;
+}
+
+/* Dark theme */
+.dark body {
+  background-color: #1e1e1e;
+  color: #cccccc;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #999999;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #464647;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #666666;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #5a5a5a;
+}
+
+/* Code syntax highlighting placeholder */
+pre {
+  background: #f8f8f8;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', Monaco, monospace;
+}
+
+.dark pre {
+  background: #2d2d30;
+}
