@@ -1,6 +1,29 @@
 import { NextRequest } from 'next/server'
-import { spawn } from 'child_process'
+import { spawn, execSync } from 'child_process'
 import { join } from 'path'
+
+// Get Claude executable path
+const getClaudePath = () => {
+  try {
+    return execSync('which claude', { encoding: 'utf8' }).trim()
+  } catch (error) {
+    // Fallback to common paths
+    const commonPaths = [
+      '/Users/ekodevapps/.nvm/versions/node/v24.4.1/bin/claude',
+      '/usr/local/bin/claude',
+      '/opt/homebrew/bin/claude'
+    ]
+    for (const path of commonPaths) {
+      try {
+        execSync(`test -f "${path}"`, { stdio: 'ignore' })
+        return path
+      } catch {
+        continue
+      }
+    }
+    throw new Error('Claude executable not found')
+  }
+}
 
 // Store active Claude Code sessions
 const activeSessions = new Map<string, {
@@ -75,11 +98,15 @@ export async function POST(request: NextRequest) {
         }
 
         try {
+          // Get Claude executable path
+          const claudePath = getClaudePath()
+          
           // Start Claude Code process
-          const claudeProcess = spawn('claude', ['code'], {
+          const claudeProcess = spawn(claudePath, ['code'], {
             cwd: workingDirectory,
             env: {
               ...process.env,
+              PATH: process.env.PATH || '/Users/ekodevapps/.nvm/versions/node/v24.4.1/bin:/usr/local/bin:/usr/bin:/bin',
               CLAUDE_CODE_SESSION_ID: sessionId,
               // Pass context as environment variables if needed
               CLAUDE_CODE_CONTEXT: JSON.stringify(context)
@@ -167,9 +194,16 @@ export async function POST(request: NextRequest) {
           }
 
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+          let helpfulMessage = `Failed to start Claude Code: ${errorMessage}`
+          
+          if (errorMessage.includes('ENOENT') || errorMessage.includes('not found')) {
+            helpfulMessage = `Claude Code CLI not found. Please install it with: npm install -g @anthropic-ai/claude`
+          }
+          
           safeEnqueue(`data: ${JSON.stringify({
             type: 'error',
-            content: `Failed to start Claude Code: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            content: helpfulMessage,
             timestamp: Date.now()
           })}\n\n`)
           cleanup()

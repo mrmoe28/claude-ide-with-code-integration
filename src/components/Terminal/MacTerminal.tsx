@@ -46,6 +46,7 @@ export function MacTerminal({ workingDirectory, className = '' }: MacTerminalPro
     }
 
     let isComponentMounted = true
+    const connectionState = connectionStateRef.current
 
     // Create terminal instance with Mac-like theme
     const terminal = new Terminal({
@@ -247,7 +248,8 @@ export function MacTerminal({ workingDirectory, className = '' }: MacTerminalPro
           try {
             fitAddon.fit()
             
-            if (connectionStateRef.current.isConnected) {
+            const currentState = connectionStateRef.current
+            if (currentState.isConnected) {
               resizeTerminal(terminal.cols, terminal.rows)
             }
           } catch (error) {
@@ -261,7 +263,6 @@ export function MacTerminal({ workingDirectory, className = '' }: MacTerminalPro
 
     return () => {
       isComponentMounted = false
-      const currentState = connectionStateRef.current
       
       window.removeEventListener('resize', handleResize)
       
@@ -269,14 +270,14 @@ export function MacTerminal({ workingDirectory, className = '' }: MacTerminalPro
         clearTimeout(resizeTimeout)
       }
       
-      if (currentState.reconnectTimer) {
-        clearTimeout(currentState.reconnectTimer)
-        currentState.reconnectTimer = null
+      if (connectionState.reconnectTimer) {
+        clearTimeout(connectionState.reconnectTimer)
+        connectionState.reconnectTimer = null
       }
       
-      if (currentState.eventSource) {
-        currentState.eventSource.close()
-        currentState.eventSource = null
+      if (connectionState.eventSource) {
+        connectionState.eventSource.close()
+        connectionState.eventSource = null
       }
       
       if (eventSourceRef.current) {
