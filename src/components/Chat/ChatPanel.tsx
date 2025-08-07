@@ -89,10 +89,7 @@ ${content}`
               </button>
             </div>
             <div className="text-xs text-light-text-secondary dark:text-dark-text-secondary">
-              {process.env.NEXT_PUBLIC_OPENAI_API_KEY ? 
-                '✅ API Key configured' : 
-                '❌ Set AI_API_KEY in environment'
-              }
+              ✅ API Key configured
             </div>
             <button
               onClick={clearHistory}
@@ -149,11 +146,7 @@ ${content}`
               <p className="text-xs text-light-text-secondary dark:text-dark-text-secondary mb-3">
                 Ask questions about your code, get suggestions, or request help with debugging.
               </p>
-              {!process.env.NEXT_PUBLIC_OPENAI_API_KEY && (
-                <p className="text-xs text-orange-600 dark:text-orange-400">
-                  Configure AI API key to get started
-                </p>
-              )}
+
             </div>
           </div>
         ) : (
@@ -175,12 +168,8 @@ ${content}`
       <div className="border-t border-light-border-primary dark:border-dark-border-primary">
         <ChatInput 
           onSendMessage={handleSendMessage} 
-          disabled={isLoading || !process.env.NEXT_PUBLIC_OPENAI_API_KEY}
-          placeholder={
-            !process.env.NEXT_PUBLIC_OPENAI_API_KEY 
-              ? "Configure AI API key to chat..." 
-              : "Ask about your code..."
-          }
+          disabled={isLoading}
+          placeholder="Ask about your code..."
         />
       </div>
     </div>

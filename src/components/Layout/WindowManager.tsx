@@ -7,7 +7,7 @@ import { EnhancedSidebar } from '@/components/FileExplorer/EnhancedSidebar'
 import { CodeEditor } from '@/components/Editor/CodeEditor'
 import { ChatPanel } from '@/components/Chat/ChatPanel'
 import { ClaudeCodePanel } from '@/components/ClaudeCode/ClaudeCodePanel'
-import { TerminalIcon, MessageSquare, X, Minimize2, Square, Code, Bot, Monitor, Laptop } from 'lucide-react'
+import { TerminalIcon, MessageSquare, X, Minimize2, Square, Code, Bot } from 'lucide-react'
 import { 
   EditorErrorBoundary,
   TerminalErrorBoundary,
@@ -21,20 +21,8 @@ import {
   FileExplorerSuspense
 } from '@/components/SuspenseWrapper'
 
-const WebContainerTerminal = dynamic(
-  () => import('@/components/Terminal/WebContainerTerminal').then(mod => ({ default: mod.WebContainerTerminal })),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="h-full flex items-center justify-center bg-gray-900 text-white">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-      </div>
-    )
-  }
-)
-
-const MacTerminal = dynamic(
-  () => import('@/components/Terminal/MacTerminal').then(mod => ({ default: mod.MacTerminal })),
+const UnifiedTerminal = dynamic(
+  () => import('@/components/Terminal/UnifiedTerminal').then(mod => ({ default: mod.UnifiedTerminal })),
   { 
     ssr: false,
     loading: () => (
@@ -56,12 +44,10 @@ interface WindowManagerProps {
   showTerminal?: boolean
   showChat?: boolean
   claudeCodeMode?: boolean
-  terminalType?: 'mac' | 'webcontainer'
   onToggleSidebar?: () => void
   onToggleTerminal?: () => void
   onToggleChat?: () => void
   onToggleClaudeCodeMode?: () => void
-  onToggleTerminalType?: () => void
 }
 
 export function WindowManager({ 
@@ -72,25 +58,21 @@ export function WindowManager({
   showTerminal: propShowTerminal,
   showChat: propShowChat,
   claudeCodeMode: propClaudeCodeMode,
-  terminalType: propTerminalType,
   onToggleSidebar,
   onToggleTerminal,
   onToggleChat,
-  onToggleClaudeCodeMode,
-  onToggleTerminalType
+  onToggleClaudeCodeMode
 }: WindowManagerProps) {
   // Use props if provided, otherwise use internal state
   const [internalShowSidebar, setInternalShowSidebar] = useState(true)
   const [internalShowTerminal, setInternalShowTerminal] = useState(false)
   const [internalShowChat, setInternalShowChat] = useState(true)
   const [internalClaudeCodeMode, setInternalClaudeCodeMode] = useState(false)
-  const [internalTerminalType, setInternalTerminalType] = useState<'mac' | 'webcontainer'>('mac')
   
   const showSidebar = propShowSidebar !== undefined ? propShowSidebar : internalShowSidebar
   const showTerminal = propShowTerminal !== undefined ? propShowTerminal : internalShowTerminal
   const showChat = propShowChat !== undefined ? propShowChat : internalShowChat
   const claudeCodeMode = propClaudeCodeMode !== undefined ? propClaudeCodeMode : internalClaudeCodeMode
-  const terminalType = propTerminalType !== undefined ? propTerminalType : internalTerminalType
   
   const [terminalMinimized, setTerminalMinimized] = useState(false)
   const [chatMinimized, setChatMinimized] = useState(false)
@@ -99,7 +81,6 @@ export function WindowManager({
   const toggleTerminal = onToggleTerminal || (() => setInternalShowTerminal(!showTerminal))
   const toggleChat = onToggleChat || (() => setInternalShowChat(!showChat))
   const toggleClaudeCodeMode = onToggleClaudeCodeMode || (() => setInternalClaudeCodeMode(!claudeCodeMode))
-  const toggleTerminalType = onToggleTerminalType || (() => setInternalTerminalType(terminalType === 'mac' ? 'webcontainer' : 'mac'))
 
   // Calculate center panel size based on visible panels and content state
   const getCenterPanelSize = () => {
@@ -204,22 +185,11 @@ export function WindowManager({
                     <div className="flex items-center justify-between p-2 border-b border-light-border-primary dark:border-dark-border-primary bg-light-bg-secondary dark:bg-dark-bg-secondary">
                       <div className="flex items-center gap-2">
                         <h3 className="text-xs font-medium text-light-text-primary dark:text-dark-text-primary">
-                          {terminalType === 'mac' ? 'MAC TERMINAL' : 'WEB TERMINAL'}
+                          TERMINAL
                         </h3>
-                        <button
-                          onClick={toggleTerminalType}
-                          className={`p-1 rounded text-xs transition-colors flex items-center gap-1 ${
-                            terminalType === 'mac'
-                              ? 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400' 
-                              : 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
-                          }`}
-                          title={terminalType === 'mac' ? 'Switch to WebContainer (Safe Sandbox)' : 'Switch to Mac Terminal (Claude Code Access)'}
-                        >
-                          {terminalType === 'mac' ? <Laptop size={10} /> : <Monitor size={10} />}
-                          <span className="text-xs">
-                            {terminalType === 'mac' ? 'System' : 'Web'}
-                          </span>
-                        </button>
+                        <span className="text-xs text-light-text-muted dark:text-dark-text-muted">
+                          Auto-detected
+                        </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <button 
@@ -242,11 +212,7 @@ export function WindowManager({
                     </div>
                     {!terminalMinimized && (
                       <TerminalErrorBoundary>
-                        {terminalType === 'mac' ? (
-                          <MacTerminal workingDirectory={workingDirectory} />
-                        ) : (
-                          <WebContainerTerminal workingDirectory={workingDirectory} />
-                        )}
+                        <UnifiedTerminal workingDirectory={workingDirectory} />
                       </TerminalErrorBoundary>
                     )}
                   </div>
