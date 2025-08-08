@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
 import { useFileSystem } from '@/hooks/useFileSystem'
 import { Header } from './Header'
@@ -11,6 +12,28 @@ export function MainLayout() {
   const { user, isLoading, isAuthenticated, hasActiveSubscription } = useAuth()
   const { directoryName } = useFileSystem()
   const [currentFile, setCurrentFile] = useState<{ path: string; content: string } | undefined>()
+  const [debugInfo, setDebugInfo] = useState<string[]>([])
+
+  // Debug logging for authentication flow
+  useEffect(() => {
+    const logs = [
+      `Auth Status: ${isLoading ? 'loading' : 'loaded'}`,
+      `Is Authenticated: ${isAuthenticated}`,
+      `Has Subscription: ${hasActiveSubscription}`,
+      `User: ${user ? user.email : 'null'}`,
+      `Environment: ${process.env.NODE_ENV || 'unknown'}`
+    ]
+    setDebugInfo(logs)
+    
+    // Log to console for debugging
+    console.log('MainLayout Auth Debug:', {
+      isLoading,
+      isAuthenticated,
+      hasActiveSubscription,
+      user,
+      environment: process.env.NODE_ENV
+    })
+  }, [isLoading, isAuthenticated, hasActiveSubscription, user])
   
   // Window management state
   const [showSidebar, setShowSidebar] = useState(true)
@@ -80,7 +103,17 @@ export function MainLayout() {
       <div className="w-screen h-screen flex items-center justify-center bg-light-bg-primary dark:bg-dark-bg-primary">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-light-accent-primary dark:border-dark-accent-primary mx-auto mb-4"></div>
-          <p className="text-light-text-secondary dark:text-dark-text-secondary">Loading...</p>
+          <p className="text-light-text-secondary dark:text-dark-text-secondary">Loading authentication...</p>
+          {process.env.NODE_ENV === 'development' && (
+            <details className="mt-4 text-sm text-left max-w-md mx-auto">
+              <summary className="cursor-pointer text-light-text-secondary dark:text-dark-text-secondary">
+                Debug Info
+              </summary>
+              <pre className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs overflow-auto">
+                {debugInfo.join('\n')}
+              </pre>
+            </details>
+          )}
         </div>
       </div>
     )
@@ -89,22 +122,45 @@ export function MainLayout() {
   if (!isAuthenticated) {
     return (
       <div className="w-screen h-screen flex items-center justify-center bg-light-bg-primary dark:bg-dark-bg-primary">
-        <div className="text-center">
+        <div className="text-center max-w-md mx-auto p-6">
           <h1 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary mb-4">
             Welcome to Claude Code IDE
           </h1>
           <p className="text-light-text-secondary dark:text-dark-text-secondary mb-6">
             Please sign in to get started
           </p>
-          <a
-            href="/auth/signin"
-            className="inline-flex items-center px-4 py-2 
-                     bg-light-accent-primary dark:bg-dark-accent-primary
-                     hover:bg-light-accent-focus dark:hover:bg-dark-accent-focus
-                     text-white rounded-md transition-colors duration-200"
-          >
-            Sign in
-          </a>
+          <div className="space-y-3">
+            <Link
+              href="/auth/signin"
+              className="block w-full px-4 py-2 
+                       bg-light-accent-primary dark:bg-dark-accent-primary
+                       hover:bg-light-accent-focus dark:hover:bg-dark-accent-focus
+                       text-white rounded-md transition-colors duration-200 text-center"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/about"
+              className="block w-full px-4 py-2 
+                       border border-light-accent-primary dark:border-dark-accent-primary
+                       text-light-accent-primary dark:text-dark-accent-primary
+                       hover:bg-light-accent-primary hover:text-white
+                       dark:hover:bg-dark-accent-primary dark:hover:text-white
+                       rounded-md transition-colors duration-200 text-center"
+            >
+              About & Version Info
+            </Link>
+          </div>
+          {process.env.NODE_ENV === 'development' && (
+            <details className="mt-6 text-sm text-left">
+              <summary className="cursor-pointer text-light-text-secondary dark:text-dark-text-secondary">
+                Debug Info
+              </summary>
+              <pre className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs overflow-auto">
+                {debugInfo.join('\n')}
+              </pre>
+            </details>
+          )}
         </div>
       </div>
     )
